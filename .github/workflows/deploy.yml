@@ -1,0 +1,29 @@
+name: Subdomain Deploy
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'domains/*.json'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: deSEC DNS Guncelle
+        env:
+          DESEC_TOKEN: ${{ secrets.DESEC_TOKEN }}
+          DESEC_DOMAIN: ${{ secrets.DESEC_DOMAIN }}
+        run: |
+          for file in domains/*.json; do
+            SUB=$(jq -r '.subdomain' "$file")
+            TYPE=$(jq -r '.type' "$file")
+            VAL=$(jq -r '.value' "$file")
+
+            curl -X POST "https://desec.io/api/v1/domains/$DESEC_DOMAIN/rrsets/" \
+              -H "Authorization: Token $DESEC_TOKEN" \
+              -H "Content-Type: application/json" \
+              -d "[{\"subname\": \"$SUB\", \"type\": \"$TYPE\", \"records\": [\"$VAL.\"], \"ttl\": 3600}]"
+          done
