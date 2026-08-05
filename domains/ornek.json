@@ -1,0 +1,5 @@
+{
+  "subdomain": "ornek",
+  "type": "CNAME",
+  "value": "kullaniciadi.github.io"
+}
